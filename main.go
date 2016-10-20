@@ -30,7 +30,12 @@ func main() {
 	alice := alice.New(log.Handler, requestID.Handler(16)).Then(router)
 
 	router.Get("/healthcheck", healthcheck.Handler)
+<<<<<<< HEAD
 	router.Get("/", resolveHandler.Handle)
+=======
+
+	router.Get("/resolve", resolver.Handler)
+>>>>>>> 0c84b7642c4964d61cabf1f840b7b497d83ab50e
 
 	log.Debug("Starting server", log.Data{"bind_addr": bindAddr})
 
