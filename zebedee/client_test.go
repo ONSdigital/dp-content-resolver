@@ -9,21 +9,38 @@ import (
 type testClient struct{}
 
 func (*testClient) Get(url string) (resp *http.Response, err error) {
-	return httptest.NewRecorder().Result(), nil
+	recorder := httptest.NewRecorder()
+	recorder.Header().Add("ONS-Page-Type", "home_page")
+	return recorder.Result(), nil
+}
+
+func (*testClient) Do(req *http.Request) (*http.Response, error) {
+	return nil, nil
 }
 
 func TestGetData(t *testing.T) {
 
-	Client := &testClient{}
-	//Url = "http://localhost:8082"
+	// create stub http client for test
+	client := &testClient{}
 
-	resp, err := Client.Get("/")
+	// inject it into an instance of zebedeeHTTPClient
+	zebedeeClient := zebedeeHTTPClient{client, "http://zebedeeUri"}
+
+	data, pageType, err := zebedeeClient.GetData("/")
 
 	if err != nil {
 		t.Error("Error", err)
 	}
 
-	if resp == nil {
-		t.Error("Nil response")
+	if data == nil {
+		t.Error("Data should not be nil")
+	}
+
+	if len(pageType) == 0 {
+		t.Error("Pagetype should have a value")
+	}
+
+	if pageType != "home_page" {
+		t.Error("Expected a pageType value of home_page but was", pageType)
 	}
 }
