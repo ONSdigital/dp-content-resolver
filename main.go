@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/ONSdigital/dp-content-resolver/handlers/resolver"
+	"github.com/ONSdigital/dp-content-resolver/handlers"
+	"github.com/ONSdigital/dp-content-resolver/resolvers"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
 	"github.com/ONSdigital/go-ns/handlers/requestID"
@@ -19,7 +20,9 @@ func main() {
 		bindAddr = ":8088"
 	}
 
-	zebedee.Init(time.Second*2, "http://localhost:8082")
+	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
+	resolver := resolvers.ZebedeeResolver{ZebedeeClient: zebedeeClient}
+	resolveHandler := handlers.ResolveHandler{Resolver: resolver}
 
 	log.Namespace = "dp-content-resolver"
 
@@ -27,8 +30,7 @@ func main() {
 	alice := alice.New(log.Handler, requestID.Handler(16)).Then(router)
 
 	router.Get("/healthcheck", healthcheck.Handler)
-
-	router.Get("/", resolver.Handler)
+	router.Get("/", resolveHandler.Handle)
 
 	log.Debug("Starting server", log.Data{"bind_addr": bindAddr})
 
