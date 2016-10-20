@@ -2,6 +2,7 @@ package zebedee
 
 import (
 	"errors"
+	"fmt"
 	"github.com/ONSdigital/go-ns/log"
 	"io"
 	"io/ioutil"
@@ -25,6 +26,11 @@ func Init(timeout time.Duration, zebedeeURL string) {
 		Timeout: timeout,
 	}, zebedeeURL,
 	}
+}
+
+type parameter struct {
+	name  string
+	value string
 }
 
 // GetData will call Zebedee and return the data it provides in a []byte
@@ -58,4 +64,48 @@ func GetData(url string) (data []byte, pageType string, err error) {
 	pageType = response.Header.Get("ONS-Page-Type") //"home_page"
 	log.Debug("Identified page type", log.Data{"page type": pageType})
 	return
+}
+
+func GetTaxonomy(url string) ([]byte, error) {
+	params := []parameter{{name: "uri", value: url}}
+	taxonomy, _ := zebedeeGet("/taxonomy", params)
+	fmt.Printf("Taxonomy \n%v\n", string(taxonomy))
+	return taxonomy, nil
+}
+
+func zebedeeGet(path string, params []parameter) ([]byte, error) {
+	request, err := buildGetRequest(path, params)
+	if err != nil {
+		log.Error(err, log.Data{"message": "error creating zebedee request"})
+	}
+
+	response, err := http.DefaultClient.Do(request)
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		log.Error(err, log.Data{"message": "Status code not 200"})
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Error(err, log.Data{"message": "failed to read response body"})
+		return nil, err
+	}
+	return body, nil
+}
+
+func buildGetRequest(url string, params []parameter) (*http.Request, error) {
+	request, err := http.NewRequest("GET", defaultClient.zebedeeURL+url, nil)
+	if err != nil {
+		log.Error(err, log.Data{"message": "error creating zebedee request"})
+	}
+
+	if len(params) > 0 {
+		query := request.URL.Query()
+		for _, param := range params {
+			query.Add(param.name, param.value)
+		}
+		request.URL.RawQuery = query.Encode()
+	}
+	return request, nil
 }
