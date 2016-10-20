@@ -18,6 +18,7 @@ type Client interface {
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
 type httpClient interface {
 	Get(url string) (resp *http.Response, err error)
+	Do(req *http.Request) (*http.Response, error)
 }
 
 // zebedeeHTTPClient is a http specific implementation of zebedeeClient, using our httpClient interface
@@ -89,7 +90,7 @@ func (zebedee *zebedeeHTTPClient) get(path string, params []parameter) ([]byte, 
 		return nil, nil
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := zebedee.httpClient.Do(request)
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
