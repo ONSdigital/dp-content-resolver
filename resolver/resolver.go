@@ -8,9 +8,14 @@ import (
 )
 
 // Resolve will take a URL and return a resolved version of the data.
-func Resolve(url string) ([]byte, error) {
+func Resolve(uri string) ([]byte, error) {
 
-	zebedeeData, pageType, err := zebedee.GetData(url)
+	if uri == "/" {
+		log.Debug("Returning homepage stud data", nil)
+		return []byte(stubbedData), nil
+	}
+
+	zebedeeData, pageType, err := zebedee.GetData(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +30,6 @@ func Resolve(url string) ([]byte, error) {
 	} else {
 		log.Debug("Page type not recognised: "+pageType, log.Data{})
 	}
-
 
 	return nil, nil
 }
