@@ -75,15 +75,15 @@ func CreateClient(timeout time.Duration, zebedeeURL string) Client {
 		zebedeeURL}
 }
 
-func GetTaxonomy(url string) ([]byte, error) {
+func (zebedee *zebedeeHTTPClient) GetTaxonomy(url string) ([]byte, error) {
 	params := []parameter{{name: "uri", value: url}}
-	taxonomy, _ := zebedeeGet("/taxonomy", params)
+	taxonomy, _ := zebedee.get("/taxonomy", params)
 	fmt.Printf("Taxonomy \n%v\n", string(taxonomy))
 	return taxonomy, nil
 }
 
-func zebedeeGet(path string, params []parameter) ([]byte, error) {
-	request, err := buildGetRequest(path, params)
+func (zebedee *zebedeeHTTPClient) get(path string, params []parameter) ([]byte, error) {
+	request, err := zebedee.buildGetRequest(path, params)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
 		return nil, nil
@@ -104,8 +104,8 @@ func zebedeeGet(path string, params []parameter) ([]byte, error) {
 	return body, nil
 }
 
-func buildGetRequest(url string, params []parameter) (*http.Request, error) {
-	request, err := http.NewRequest("GET", defaultClient.zebedeeURL+url, nil)
+func (zebedee *zebedeeHTTPClient) buildGetRequest(url string, params []parameter) (*http.Request, error) {
+	request, err := http.NewRequest("GET", zebedee.url+url, nil)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
 		return nil, nil
