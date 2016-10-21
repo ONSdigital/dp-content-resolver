@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/ONSdigital/dp-content-resolver/resolvers"
 	"github.com/ONSdigital/go-ns/log"
-	"net/http"
 )
 
 // Handler interface
@@ -21,7 +22,7 @@ func (handler *ResolveHandler) Handle(w http.ResponseWriter, req *http.Request) 
 
 	log.DebugR(req, "Resolver handler", nil)
 
-	data, err := handler.Resolver.Resolve(req.URL.Query().Get("uri"))
+	data, err := handler.Resolver.Resolve(req.URL.Path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

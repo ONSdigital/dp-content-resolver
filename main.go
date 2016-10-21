@@ -32,7 +32,7 @@ func main() {
 
 	router.Get("/healthcheck", healthcheck.Handler)
 
-	router.Get("/resolve", resolveHandler.Handle)
+	router.Get("/{uri:.*}", resolveHandler.Handle)
 
 	log.Debug("Starting server", log.Data{"bind_addr": bindAddr})
 
