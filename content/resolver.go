@@ -3,18 +3,18 @@ package content
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	"github.com/ONSdigital/go-ns/log"
 )
 
-// Exported zebedee client allowing injection.
-var ZebedeeClient zebedee.Client
+// GetData is a generic function definition allowing different
+// implementations to be injected.
+var GetData func(url string) (data []byte, pageType string, err error)
 
 // Resolve will take a URL and return a resolved version of the data.
 func Resolve(uri string) ([]byte, error) {
 
-	zebedeeData, pageType, err := ZebedeeClient.GetData(uri)
+	zebedeeData, pageType, err := GetData(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func Resolve(uri string) ([]byte, error) {
 func resolve(ch chan model.HomePage, url string) {
 	log.Debug("Resolving page data", log.Data{"url": url})
 
-	data, pageType, err := ZebedeeClient.GetData(url)
+	data, pageType, err := GetData(url)
 	if err != nil {
 		log.Error(err, log.Data{})
 		close(ch)

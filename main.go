@@ -21,8 +21,7 @@ func main() {
 	}
 
 	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
-	content.ZebedeeClient = zebedeeClient
-	handlers.Resolve = content.Resolve
+	content.GetData = zebedeeClient.GetData
 
 	log.Namespace = "dp-content-resolver"
 

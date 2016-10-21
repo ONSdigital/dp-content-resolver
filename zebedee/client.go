@@ -10,19 +10,14 @@ import (
 	"time"
 )
 
-// Client provides the interface to zebedee.
-type Client interface {
-	GetData(url string) (data []byte, pageType string, err error)
-}
-
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
 type httpClient interface {
 	Get(url string) (resp *http.Response, err error)
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// zebedeeHTTPClient is a http specific implementation of zebedeeClient, using our httpClient interface
-type zebedeeHTTPClient struct {
+// Client holds the required fields to call Zebedee.
+type Client struct {
 	httpClient httpClient
 	url        string
 }
@@ -33,7 +28,7 @@ type parameter struct {
 }
 
 // GetData will call Zebedee and return the data it provides in a []byte
-func (zebedee *zebedeeHTTPClient) GetData(url string) (data []byte, pageType string, err error) {
+func (zebedee *Client) GetData(url string) (data []byte, pageType string, err error) {
 	// get page data from zebedee (homepage)
 	log.Debug("Getting data from zebedee", log.Data{"url": url})
 	var response *http.Response
@@ -67,23 +62,25 @@ func (zebedee *zebedeeHTTPClient) GetData(url string) (data []byte, pageType str
 // ErrUnexpectedStatusCode is the error returned when you get an unexpected error code.
 var ErrUnexpectedStatusCode = errors.New("Unexpected status code")
 
-// CreateClient will create a new zebedeeHTTPClient for the given url and timeout.
-func CreateClient(timeout time.Duration, zebedeeURL string) Client {
-	return &zebedeeHTTPClient{
+// CreateClient will create a new ZebedeeHTTPClient for the
+// given url and timeout.
+func CreateClient(timeout time.Duration, zebedeeURL string) *Client {
+	return &Client{
 		&http.Client{
 			Timeout: timeout,
 		},
 		zebedeeURL}
 }
 
-func (zebedee *zebedeeHTTPClient) GetTaxonomy(url string) ([]byte, error) {
+// GetTaxonomy gets the taxonomy structure of the website from Zebedee
+func (zebedee *Client) GetTaxonomy(url string) ([]byte, error) {
 	params := []parameter{{name: "uri", value: url}}
 	taxonomy, _ := zebedee.get("/taxonomy", params)
 	fmt.Printf("Taxonomy \n%v\n", string(taxonomy))
 	return taxonomy, nil
 }
 
-func (zebedee *zebedeeHTTPClient) get(path string, params []parameter) ([]byte, error) {
+func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 	request, err := zebedee.buildGetRequest(path, params)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
@@ -105,7 +102,7 @@ func (zebedee *zebedeeHTTPClient) get(path string, params []parameter) ([]byte, 
 	return body, nil
 }
 
-func (zebedee *zebedeeHTTPClient) buildGetRequest(url string, params []parameter) (*http.Request, error) {
+func (zebedee *Client) buildGetRequest(url string, params []parameter) (*http.Request, error) {
 	request, err := http.NewRequest("GET", zebedee.url+url, nil)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})

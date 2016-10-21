@@ -2,12 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/dp-content-resolver/model"
 	"github.com/ONSdigital/go-ns/log"
 	"net/http"
 )
 
-var Resolve func(url string) ([]byte, error)
+// Resolve is the function called to resolve page data.
+// Its defined as an exported package member allowing
+// alternative implementations to be injected
+var Resolve = content.Resolve
 
 // Handle will resolve the page defined by the path.
 func Handle(w http.ResponseWriter, req *http.Request) {
