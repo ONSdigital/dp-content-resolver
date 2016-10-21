@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"net/http"
-	"github.com/ONSdigital/dp-content-resolver/content"
-	"github.com/ONSdigital/go-ns/log"
-	"github.com/ONSdigital/dp-content-resolver/model"
 	"encoding/json"
+	"github.com/ONSdigital/dp-content-resolver/content"
+	"github.com/ONSdigital/dp-content-resolver/model"
+	"github.com/ONSdigital/go-ns/log"
+	"net/http"
 )
 
 // Handler interface
