@@ -1,6 +1,6 @@
 #!/bin/bash
 
 golint ./... \
-&& go fmt -w ./... \
+&& go fmt ./... \
 && make \
 && build/dp-content-resolver
