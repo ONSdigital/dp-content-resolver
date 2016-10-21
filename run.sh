@@ -1,3 +1,6 @@
 #!/bin/bash
 
-golint ./... && make && build/dp-content-resolver
+golint ./... \
+&& go fmt -w ./... \
+&& make \
+&& build/dp-content-resolver
