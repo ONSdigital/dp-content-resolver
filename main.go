@@ -1,18 +1,17 @@
 package main
 
 import (
-	"net/http"
-	"os"
-	"time"
-
+	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/dp-content-resolver/handlers"
-	"github.com/ONSdigital/dp-content-resolver/resolvers"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
 	"github.com/ONSdigital/go-ns/handlers/requestID"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/gorilla/pat"
 	"github.com/justinas/alice"
+	"net/http"
+	"os"
+	"time"
 )
 
 func main() {
@@ -22,7 +21,7 @@ func main() {
 	}
 
 	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
-	resolver := resolvers.ZebedeeResolver{ZebedeeClient: zebedeeClient}
+	resolver := content.ZebedeeResolver{ZebedeeClient: zebedeeClient}
 	resolveHandler := handlers.ResolveHandler{Resolver: resolver}
 
 	log.Namespace = "dp-content-resolver"

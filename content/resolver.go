@@ -1,7 +1,8 @@
-package resolvers
+package content
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	"github.com/ONSdigital/go-ns/log"
@@ -43,21 +44,19 @@ func (resolver ZebedeeResolver) Resolve(uri string) ([]byte, error) {
 			urlsToResolve[i] = section.Statistics.URI
 		}
 
-		//// get the json for each url (concurrently)
-		//urlToChannelMap := make(map[string]chan model.HomePage)
-		//
-		//for _, url := range urlsToResolve {
-		//	channel := make(chan model.HomePage)
-		//	urlToChannelMap[url] = channel
-		//	go resolve(channel, url)
-		//}
-		//
-		////fmt.Println(page)
-		//
-		//for _, channel := range urlToChannelMap {
-		//	var page unresolved.HomePage = <-channel
-		//	fmt.Println("woot " + page.Description.Title)
-		//}
+		// get the json for each url (concurrently)
+		urlToChannelMap := make(map[string]chan model.HomePage)
+
+		for _, url := range urlsToResolve {
+			channel := make(chan model.HomePage)
+			urlToChannelMap[url] = channel
+			go resolver.resolve(channel, url)
+		}
+
+		for _, channel := range urlToChannelMap {
+			var page model.HomePage = <-channel
+			fmt.Println("woot " + page.Description.Title)
+		}
 
 	} else {
 		log.Debug("Page type not recognised: "+pageType, log.Data{})

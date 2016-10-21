@@ -1,4 +1,4 @@
-package resolvers
+package content
 
 var stubbedData = `{
   "taxonomy": [

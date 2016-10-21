@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/ONSdigital/dp-content-resolver/resolvers"
+	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/go-ns/log"
 )
 
@@ -14,7 +14,7 @@ type Handler interface {
 
 // ResolveHandler deals with the http request and forwards the extracted url onto the resolver.
 type ResolveHandler struct {
-	Resolver resolvers.Resolver
+	Resolver content.Resolver
 }
 
 // Handle will resolve the page defined by the path.
