@@ -5,6 +5,8 @@ import (
 
 	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/dp-content-resolver/model"
+	"encoding/json"
 )
 
 // Handler interface
@@ -22,12 +24,18 @@ func (handler *ResolveHandler) Handle(w http.ResponseWriter, req *http.Request) 
 
 	log.DebugR(req, "Resolver handler", nil)
 
+	w.Header().Set("Content-Type", "application/json")
+
 	data, err := handler.Resolver.Resolve(req.URL.Path)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		jsonEncoder := json.NewEncoder(w)
+		jsonEncoder.Encode(model.ErrorResponse{
+			Error: err.Error(),
+		})
+		log.ErrorR(req, err, nil)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(data)
 }
