@@ -39,7 +39,7 @@ func (zebedee *zebedeeHTTPClient) GetData(url string) (data []byte, pageType str
 	var response *http.Response
 	response, err = zebedee.httpClient.Get(zebedee.url + "/data?uri=" + url)
 	if err != nil {
-		log.Debug("Failed to get data from zebedee", log.Data{"url": url})
+		log.Error(err, log.Data{"url": url})
 		return
 	}
 
@@ -55,7 +55,7 @@ func (zebedee *zebedeeHTTPClient) GetData(url string) (data []byte, pageType str
 	data, err = ioutil.ReadAll(response.Body)
 	response.Body.Close()
 	if err != nil {
-		log.Debug("Failed to deserialise json from zebedee", log.Data{"url": url})
+		log.Error(err, log.Data{"url": url})
 		return
 	}
 
