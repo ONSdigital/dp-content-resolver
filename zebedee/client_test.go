@@ -21,10 +21,10 @@ func (*testClient) Do(req *http.Request) (*http.Response, error) {
 func TestGetData(t *testing.T) {
 
 	// create stub http client for test
-	client := &testClient{}
+	testHTTPClient := &testClient{}
 
 	// inject it into an instance of zebedeeHTTPClient
-	zebedeeClient := zebedeeHTTPClient{client, "http://zebedeeUri"}
+	zebedeeClient := Client{testHTTPClient, "http://zebedeeUri"}
 
 	data, pageType, err := zebedeeClient.GetData("/")
 
