@@ -8,25 +8,13 @@ import (
 	"github.com/ONSdigital/go-ns/log"
 )
 
-// Resolver provides the interface for resolving data.
-type Resolver interface {
-	Resolve(url string) ([]byte, error)
-}
-
-// ZebedeeResolver is the zebedee specific implementation of the Resolver interface
-type ZebedeeResolver struct {
-	ZebedeeClient zebedee.Client
-}
+// Exported zebedee client allowing injection.
+var ZebedeeClient zebedee.Client
 
 // Resolve will take a URL and return a resolved version of the data.
-func (resolver ZebedeeResolver) Resolve(uri string) ([]byte, error) {
+func Resolve(uri string) ([]byte, error) {
 
-	if uri == "/" {
-		log.Debug("Returning homepage stub data", nil)
-		return []byte(stubbedData), nil
-	}
-
-	zebedeeData, pageType, err := resolver.ZebedeeClient.GetData(uri)
+	zebedeeData, pageType, err := ZebedeeClient.GetData(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -44,13 +32,13 @@ func (resolver ZebedeeResolver) Resolve(uri string) ([]byte, error) {
 			urlsToResolve[i] = section.Statistics.URI
 		}
 
-		// get the json for each url (concurrently)
 		urlToChannelMap := make(map[string]chan model.HomePage)
 
+		// get the json for each url (concurrently)
 		for _, url := range urlsToResolve {
 			channel := make(chan model.HomePage)
 			urlToChannelMap[url] = channel
-			go resolver.resolve(channel, url)
+			go resolve(channel, url)
 		}
 
 		for _, channel := range urlToChannelMap {
@@ -65,10 +53,10 @@ func (resolver ZebedeeResolver) Resolve(uri string) ([]byte, error) {
 	return nil, nil
 }
 
-func (resolver *ZebedeeResolver) resolve(ch chan model.HomePage, url string) {
+func resolve(ch chan model.HomePage, url string) {
 	log.Debug("Resolving page data", log.Data{"url": url})
 
-	data, pageType, err := resolver.ZebedeeClient.GetData(url)
+	data, pageType, err := ZebedeeClient.GetData(url)
 	if err != nil {
 		log.Error(err, log.Data{})
 		close(ch)

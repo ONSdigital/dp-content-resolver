@@ -21,8 +21,8 @@ func main() {
 	}
 
 	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
-	resolver := content.ZebedeeResolver{ZebedeeClient: zebedeeClient}
-	resolveHandler := handlers.ResolveHandler{Resolver: resolver}
+	content.ZebedeeClient = zebedeeClient
+	handlers.Resolve = content.Resolve
 
 	log.Namespace = "dp-content-resolver"
 
@@ -31,7 +31,7 @@ func main() {
 
 	router.Get("/healthcheck", healthcheck.Handler)
 
-	router.Get("/{uri:.*}", resolveHandler.Handle)
+	router.Get("/{uri:.*}", handlers.Handle)
 
 	log.Debug("Starting server", log.Data{"bind_addr": bindAddr})
 

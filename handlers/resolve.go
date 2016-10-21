@@ -2,30 +2,21 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/dp-content-resolver/model"
 	"github.com/ONSdigital/go-ns/log"
 	"net/http"
 )
 
-// Handler interface
-type Handler interface {
-	Handle(w http.ResponseWriter, req *http.Request)
-}
-
-// ResolveHandler deals with the http request and forwards the extracted url onto the resolver.
-type ResolveHandler struct {
-	Resolver content.Resolver
-}
+var Resolve func(url string) ([]byte, error)
 
 // Handle will resolve the page defined by the path.
-func (handler *ResolveHandler) Handle(w http.ResponseWriter, req *http.Request) {
+func Handle(w http.ResponseWriter, req *http.Request) {
 
 	log.DebugR(req, "Resolver handler", nil)
 
 	w.Header().Set("Content-Type", "application/json")
 
-	data, err := handler.Resolver.Resolve(req.URL.Path)
+	data, err := Resolve(req.URL.Path)
 	if err != nil {
 		writeErrorResponse(err, w)
 		log.ErrorR(req, err, nil)
