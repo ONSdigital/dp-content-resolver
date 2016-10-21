@@ -1,6 +1,10 @@
 package main
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/ONSdigital/dp-content-resolver/handlers"
 	"github.com/ONSdigital/dp-content-resolver/resolvers"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
@@ -9,15 +13,12 @@ import (
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/gorilla/pat"
 	"github.com/justinas/alice"
-	"net/http"
-	"os"
-	"time"
 )
 
 func main() {
 	bindAddr := os.Getenv("BIND_ADDR")
 	if len(bindAddr) == 0 {
-		bindAddr = ":8088"
+		bindAddr = ":20020"
 	}
 
 	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
