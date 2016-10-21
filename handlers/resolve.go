@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-
 	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/dp-content-resolver/model"
@@ -28,14 +27,18 @@ func (handler *ResolveHandler) Handle(w http.ResponseWriter, req *http.Request) 
 
 	data, err := handler.Resolver.Resolve(req.URL.Path)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		jsonEncoder := json.NewEncoder(w)
-		jsonEncoder.Encode(model.ErrorResponse{
-			Error: err.Error(),
-		})
+		writeErrorResponse(err, w)
 		log.ErrorR(req, err, nil)
 	}
 
 	w.WriteHeader(200)
 	w.Write(data)
+}
+
+func writeErrorResponse(err error, w http.ResponseWriter) {
+	w.WriteHeader(http.StatusBadRequest)
+	jsonEncoder := json.NewEncoder(w)
+	jsonEncoder.Encode(model.ErrorResponse{
+		Error: err.Error(),
+	})
 }
