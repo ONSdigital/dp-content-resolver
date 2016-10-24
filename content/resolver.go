@@ -14,6 +14,12 @@ var GetData func(url string) (data []byte, pageType string, err error)
 // Resolve will take a URL and return a resolved version of the data.
 func Resolve(uri string) ([]byte, error) {
 
+	if uri == "/" {
+		// TODO REMOVE BEFORE COMMIT
+		log.Debug("Using Stubbed JSON", nil)
+		return []byte(stubbedData), nil
+	}
+
 	zebedeeData, pageType, err := GetData(uri)
 	if err != nil {
 		return nil, err
@@ -47,7 +53,7 @@ func Resolve(uri string) ([]byte, error) {
 		}
 
 	} else {
-		log.Debug("Page type not recognised: "+pageType, log.Data{})
+		log.Debug("Page type not recognised: " + pageType, log.Data{})
 	}
 
 	return nil, nil
