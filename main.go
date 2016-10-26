@@ -22,6 +22,7 @@ func main() {
 
 	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
 	content.GetData = zebedeeClient.GetData
+	content.GetTaxonomy = zebedeeClient.GetTaxonomy
 
 	log.Namespace = "dp-content-resolver"
 
