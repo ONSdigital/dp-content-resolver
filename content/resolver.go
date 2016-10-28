@@ -2,17 +2,17 @@ package content
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	rendermodel "github.com/ONSdigital/dp-frontend-renderer/model"
 	"github.com/ONSdigital/go-ns/log"
 )
 
-// GetData is a generic function definition allowing different
-// implementations to be injected.
-var GetData func(url string) (data []byte, pageType string, err error)
+const errorPrefix string = "resolver."
 
-var GetTaxonomy func(url string, depth int) ([]byte, error)
+var ZebedeeService zebedee.Service
 
 // Resolve will take a URL and return a resolved version of the data.
 func Resolve(uri string) ([]byte, error) {
@@ -23,8 +23,7 @@ func Resolve(uri string) ([]byte, error) {
 		var fullHomePage []byte
 		var err error
 
-		zebedeePageBytes, _, _ := GetData(uri)
-		//rendererTaxonomyNodes, _ := resolveTaxonomy(uri)
+		zebedeePageBytes, _, _ := ZebedeeService.GetData(uri)
 
 		var homepage zebedeeModel.HomePage
 		json.Unmarshal(zebedeePageBytes, &homepage)
@@ -37,7 +36,7 @@ func Resolve(uri string) ([]byte, error) {
 		return fullHomePage, nil
 	}
 
-	zebedeeData, pageType, err := GetData(uri)
+	zebedeeData, pageType, err := ZebedeeService.GetData(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +69,7 @@ func Resolve(uri string) ([]byte, error) {
 		}
 
 	} else {
-		log.Debug("Page type not recognised: " + pageType, log.Data{})
+		log.Debug("Page type not recognised: "+pageType, log.Data{})
 	}
 
 	return nil, nil
@@ -79,7 +78,7 @@ func Resolve(uri string) ([]byte, error) {
 func resolve(ch chan zebedeeModel.HomePage, url string) {
 	log.Debug("Resolving page data", log.Data{"url": url})
 
-	data, pageType, err := GetData(url)
+	data, pageType, err := ZebedeeService.GetData(url)
 	if err != nil {
 		log.Error(err, log.Data{})
 		close(ch)
@@ -100,29 +99,55 @@ func resolve(ch chan zebedeeModel.HomePage, url string) {
 	close(ch)
 }
 
-func resolveTaxonomy(uri string) (rendererTaxonomyList []rendermodel.TaxonomyNode, err error) {
-	rendererTaxonomyList = make([]rendermodel.TaxonomyNode, 0)
-	var zebedeeTaxonomyList = make([]zebedeeModel.Taxonomy, 0)
-	var zebedeeTaxonomyBytes []byte
+func resolveTaxonomy(uri string) ([]rendermodel.TaxonomyNode, error) {
+	var rendererTaxonomyList []rendermodel.TaxonomyNode
+	var zebedeeContentNodeList []zebedeeModel.ContentNode
+	var zebedeeContentNodeBytes []byte
 
-	zebedeeTaxonomyBytes, err = GetTaxonomy(uri, 2)
+	zebedeeContentNodeBytes, err := ZebedeeService.GetTaxonomy(uri, 2)
 
 	if err != nil {
 		log.ErrorC("resolver.resolveTaxonomy: Error resolving taxonomy", err, nil)
 		return rendererTaxonomyList, err
 	}
 
-	err = json.Unmarshal(zebedeeTaxonomyBytes, &zebedeeTaxonomyList)
+	err = json.Unmarshal(zebedeeContentNodeBytes, &zebedeeContentNodeList)
 	if err != nil {
 		log.ErrorC("resolver.resolveTaxonomy: Error unmarshalling json to taxonomy node.", err, nil)
-		return rendererTaxonomyList, err
+		return rendererTaxonomyList, fmtError("resolveTaxonomy", "Error unmarshalling taxonomy json.")
+	}
+	return contentNodeListToTaxonomyList(zebedeeContentNodeList), nil
+}
+
+func resolveParents(c chan []rendermodel.TaxonomyNode, uri string) {
+	var err error
+	zebedeeBytes, err := ZebedeeService.GetParents(uri)
+
+	if err != nil {
+		log.Error(fmtError("resolveParents", "Error getting parents from zebdee"), nil)
+		close(c)
+		return
 	}
 
-	// Convert the from the zebedee model to the renderer model.
-	rendererTaxonomyList = make([]rendermodel.TaxonomyNode, len(zebedeeTaxonomyList))
-	for _, zebedeeTaxonomyNode := range zebedeeTaxonomyList {
-		rendererTaxonomyList = append(rendererTaxonomyList, zebedeeTaxonomyNode.Map())
-	}
+	var contentNodes []zebedeeModel.ContentNode
+	err = json.Unmarshal(zebedeeBytes, &contentNodes)
 
-	return rendererTaxonomyList, nil
+	if err != nil {
+		log.Error(fmtError("resolveParents", "Error unmarshalling zebedee parents json to contentNode."), nil)
+		close(c)
+		return
+	}
+	c <- contentNodeListToTaxonomyList(contentNodes)
+	close(c)
+}
+
+func contentNodeListToTaxonomyList(contentNodes []zebedeeModel.ContentNode) (taxonomyList []rendermodel.TaxonomyNode) {
+	for _, zebedeeContentNode := range contentNodes {
+		taxonomyList = append(taxonomyList, zebedeeContentNode.Map())
+	}
+	return taxonomyList
+}
+
+func fmtError(funcName string, message string) error {
+	return errors.New(fmt.Sprintf("%v%v: %v", errorPrefix, funcName, message))
 }
