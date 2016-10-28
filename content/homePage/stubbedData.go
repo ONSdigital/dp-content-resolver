@@ -1,4 +1,4 @@
-package content
+package homePage
 
 var stubbedData = `{
   "taxonomy": [
