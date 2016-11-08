@@ -20,8 +20,7 @@ func main() {
 		bindAddr = ":20020"
 	}
 
-	zebedeeClient := zebedee.CreateClient(time.Second*2, "http://localhost:8082")
-	content.GetData = zebedeeClient.GetData
+	content.ZebedeeService = zebedee.CreateClient(time.Second*2, "http://localhost:8082")
 
 	log.Namespace = "dp-content-resolver"
 

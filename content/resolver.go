@@ -3,20 +3,19 @@ package content
 import (
 	"errors"
 	"github.com/ONSdigital/dp-content-resolver/content/homePage"
+	"github.com/ONSdigital/dp-content-resolver/zebedee"
 )
 
-var pageTypeToResolver = map[string]func([]byte, func(url string) (data []byte, pageType string, err error)) ([]byte, error){
+var pageTypeToResolver = map[string]func([]byte, zebedee.Service) ([]byte, error){
 	"home_page": homePage.Resolve,
 }
 
-// GetData is a generic function definition allowing different
-// implementations to be injected.
-var GetData func(url string) (data []byte, pageType string, err error)
+var ZebedeeService zebedee.Service
 
 // Resolve will take a URL and return a resolved version of the data.
 func Resolve(uri string) ([]byte, error) {
 
-	zebedeeData, pageType, err := GetData(uri)
+	zebedeeData, pageType, err := ZebedeeService.GetData(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +27,9 @@ func Resolve(uri string) ([]byte, error) {
 		return nil, errors.New("Page type not recognised: " + pageType)
 	}
 
-	resolvedData, err := resolveFunc(zebedeeData, GetData)
+	resolvedData, err := resolveFunc(zebedeeData, ZebedeeService)
 	if err != nil {
 		return nil, err
 	}
-
-	return resolvedData, nil
+	return resolvedData, err
 }

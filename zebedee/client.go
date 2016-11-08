@@ -2,11 +2,11 @@ package zebedee
 
 import (
 	"errors"
-	"fmt"
 	"github.com/ONSdigital/go-ns/log"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -73,11 +73,12 @@ func CreateClient(timeout time.Duration, zebedeeURL string) *Client {
 }
 
 // GetTaxonomy gets the taxonomy structure of the website from Zebedee
-func (zebedee *Client) GetTaxonomy(url string) ([]byte, error) {
-	params := []parameter{{name: "uri", value: url}}
-	taxonomy, _ := zebedee.get("/taxonomy", params)
-	fmt.Printf("Taxonomy \n%v\n", string(taxonomy))
-	return taxonomy, nil
+func (zebedee *Client) GetTaxonomy(url string, depth int) ([]byte, error) {
+	return zebedee.get("/taxonomy", []parameter{{name: "uri", value: url}, {name: "depth", value: strconv.Itoa(depth)}})
+}
+
+func (zebedee *Client) GetParents(url string) ([]byte, error) {
+	return zebedee.get("/parents", []parameter{{name: "uri", value: url}})
 }
 
 func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
@@ -103,7 +104,7 @@ func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 }
 
 func (zebedee *Client) buildGetRequest(url string, params []parameter) (*http.Request, error) {
-	request, err := http.NewRequest("GET", zebedee.url+url, nil)
+	request, err := http.NewRequest("GET", zebedee.url + url, nil)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
 		return nil, nil
