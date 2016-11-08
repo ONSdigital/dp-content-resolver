@@ -6,7 +6,7 @@ type HomePage struct {
 	URI         string          `json:"uri"`
 	Sections    []HomeSection   `json:"sections"`
 	Description PageDescription `json:"description"`
-	Taxonomy    []Taxonomy `json:"taxonomy"`
+	Taxonomy    []ContentNode   `json:"taxonomy"`
 }
 
 // HomeSection represents a single section of the homepage.

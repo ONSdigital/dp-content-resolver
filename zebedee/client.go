@@ -6,8 +6,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 )
 
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
@@ -74,9 +74,11 @@ func CreateClient(timeout time.Duration, zebedeeURL string) *Client {
 
 // GetTaxonomy gets the taxonomy structure of the website from Zebedee
 func (zebedee *Client) GetTaxonomy(url string, depth int) ([]byte, error) {
-	params := []parameter{{name: "uri", value: url}, {name: "depth", value: strconv.Itoa(depth)}}
-	taxonomy, _ := zebedee.get("/taxonomy", params)
-	return taxonomy, nil
+	return zebedee.get("/taxonomy", []parameter{{name: "uri", value: url}, {name: "depth", value: strconv.Itoa(depth)}})
+}
+
+func (zebedee *Client) GetParents(url string) ([]byte, error) {
+	return zebedee.get("/parents", []parameter{{name: "uri", value: url}})
 }
 
 func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
