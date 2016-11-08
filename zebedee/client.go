@@ -104,7 +104,7 @@ func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 }
 
 func (zebedee *Client) buildGetRequest(url string, params []parameter) (*http.Request, error) {
-	request, err := http.NewRequest("GET", zebedee.url + url, nil)
+	request, err := http.NewRequest("GET", zebedee.url+url, nil)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
 		return nil, nil
