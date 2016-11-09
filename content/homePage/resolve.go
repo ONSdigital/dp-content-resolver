@@ -99,9 +99,6 @@ func resolveSections(pageSections []*zebedeeModel.HomeSection, zebedeeService ze
 }
 
 func getTimeSeriesPage(url string, zebedeeService zebedee.Service) (*zebedeeModel.TimeseriesPage, error) {
-    if url == "/bob" {
-        return nil, errors.New("FORCED ERROR")
-    }
     log.Debug("Resolving page data", log.Data{"url": url})
 
     data, _, err := zebedeeService.GetData(url + "&series")
