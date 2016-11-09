@@ -26,9 +26,9 @@ func Resolve(zebedeeData []byte, zebedeeService zebedee.Service) (resolvedPageDa
 
 	var wg sync.WaitGroup // synchronises each resolve job running concurrently.
 
-	resolveTaxonomyAsync(pageToResolve.URI, &resolvedPage, wg, zebedeeService)
-	//resolveParentsAsync(pageToResolve.URI, &resolvedPage, wg, zebedeeService) // breadcrumb
-	//resolveSections(&pageToResolve, &resolvedPage, wg, zebedeeService)
+	resolveTaxonomyAsync(pageToResolve.URI, &resolvedPage, &wg, zebedeeService)
+	resolveParentsAsync(pageToResolve.URI, &resolvedPage, &wg, zebedeeService) // breadcrumb
+	resolveSections(&pageToResolve, &resolvedPage, &wg, zebedeeService)
 
 	wg.Wait() // wait for all the resolve jobs to complete.
 
@@ -36,7 +36,7 @@ func Resolve(zebedeeData []byte, zebedeeService zebedee.Service) (resolvedPageDa
 	return
 }
 
-func resolveTaxonomyAsync(uri string, resolvedPage *homepage.Page, wg sync.WaitGroup, zebedeeService zebedee.Service) {
+func resolveTaxonomyAsync(uri string, resolvedPage *homepage.Page, wg *sync.WaitGroup, zebedeeService zebedee.Service) {
 	wg.Add(1)
 
 	go func() {
@@ -49,7 +49,7 @@ func resolveTaxonomyAsync(uri string, resolvedPage *homepage.Page, wg sync.WaitG
 	}()
 }
 
-func resolveParentsAsync(uri string, resolvedPage *homepage.Page, wg sync.WaitGroup, zebedeeService zebedee.Service) {
+func resolveParentsAsync(uri string, resolvedPage *homepage.Page, wg *sync.WaitGroup, zebedeeService zebedee.Service) {
 	wg.Add(1)
 
 	go func() {
@@ -60,7 +60,7 @@ func resolveParentsAsync(uri string, resolvedPage *homepage.Page, wg sync.WaitGr
 	}()
 }
 
-func resolveSections(pageToResolve *zebedeeModel.HomePage, resolvedPage *homepage.Page, wg sync.WaitGroup, zebedeeService zebedee.Service) {
+func resolveSections(pageToResolve *zebedeeModel.HomePage, resolvedPage *homepage.Page, wg *sync.WaitGroup, zebedeeService zebedee.Service) {
 
 	// initialise the headline figures array allowing each index to be assigned to concurrently.
 	resolvedPage.Data.HeadlineFigures = make([]*homepage.HeadlineFigure, len(pageToResolve.Sections))
