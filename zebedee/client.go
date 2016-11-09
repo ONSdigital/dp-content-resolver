@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
@@ -92,7 +93,8 @@ func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		log.Error(err, log.Data{"message": "Status code not 200"})
+		// TODO fix this properly.
+		fmt.Println("Status code not 200")
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(response.Body)
