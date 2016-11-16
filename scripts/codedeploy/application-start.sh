@@ -17,6 +17,7 @@ else
 fi
 
 source $CONFIG && docker run -d \
+  --env=BIND_ADDR=$BIND_ADDR    \
   --name=content-resolver       \
   --net=$DOCKER_NETWORK         \
   --restart=always              \
