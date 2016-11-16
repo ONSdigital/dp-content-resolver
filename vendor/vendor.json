@@ -3,28 +3,46 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "rhIbkFbL85qBxViqDKc55tK2qUc=",
+			"path": "github.com/ONSdigital/dp-frontend-renderer/config",
+			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
+			"revisionTime": "2016-10-27T12:41:44Z"
+		},
+		{
+			"checksumSHA1": "X/9WEMN4W38BrAa9Mq/0IxQTLxw=",
+			"path": "github.com/ONSdigital/dp-frontend-renderer/handlers/homepage",
+			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
+			"revisionTime": "2016-10-27T12:41:44Z"
+		},
+		{
 			"checksumSHA1": "WtiJ7T5yGlgF7S4dtvdIJxE5nZM=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/model",
-			"revision": "a5981f2950e0ff4eae6c5b57eaeb663d1cec858e",
-			"revisionTime": "2016-10-21T07:17:36Z"
+			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
+			"revisionTime": "2016-10-27T12:41:44Z"
+		},
+		{
+			"checksumSHA1": "TsGOSJlxHQ5lMSrwCWAVfFZ3f8w=",
+			"path": "github.com/ONSdigital/dp-frontend-renderer/render",
+			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
+			"revisionTime": "2016-10-27T12:41:44Z"
 		},
 		{
 			"checksumSHA1": "ei+/RCSa0XO9v9rQxAh0uqyJ/28=",
 			"path": "github.com/ONSdigital/go-ns/handlers/healthcheck",
-			"revision": "474f7605b6424182f199984527c898f508242632",
-			"revisionTime": "2016-10-18T07:24:53Z"
+			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
+			"revisionTime": "2016-10-21T07:34:12Z"
 		},
 		{
 			"checksumSHA1": "J9OiPnhPHFPhQ+R+dq6LFj+dTxE=",
 			"path": "github.com/ONSdigital/go-ns/handlers/requestID",
-			"revision": "474f7605b6424182f199984527c898f508242632",
-			"revisionTime": "2016-10-18T07:24:53Z"
+			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
+			"revisionTime": "2016-10-21T07:34:12Z"
 		},
 		{
-			"checksumSHA1": "5bYy7rgsAG7TkWeyDBPC3PpT6fg=",
+			"checksumSHA1": "t9V2N7/M260lThgot3Iv7a0wxd4=",
 			"path": "github.com/ONSdigital/go-ns/log",
-			"revision": "474f7605b6424182f199984527c898f508242632",
-			"revisionTime": "2016-10-18T07:24:53Z"
+			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
+			"revisionTime": "2016-10-21T07:34:12Z"
 		},
 		{
 			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
@@ -45,12 +63,6 @@
 			"revisionTime": "2016-04-13T04:16:32Z"
 		},
 		{
-			"checksumSHA1": "tewA7jXVGCw1zb5mA0BDecWi4iQ=",
-			"path": "github.com/jtolds/gls",
-			"revision": "8ddce2a84170772b95dd5d576c48d517b22cac63",
-			"revisionTime": "2016-01-05T22:08:40Z"
-		},
-		{
 			"checksumSHA1": "OBvAHqWjdI4NQVAqTkcQAdTuCFY=",
 			"path": "github.com/justinas/alice",
 			"revision": "1051eaf52fcafdd87ead59d28b065f1fcb8274ec",
@@ -63,40 +75,11 @@
 			"revisionTime": "2015-09-14T16:22:38Z"
 		},
 		{
-			"checksumSHA1": "6AYg4fjEvFuAVN3wHakGApjhZAM=",
-			"path": "github.com/smartystreets/assertions",
-			"revision": "2063fd1cc7c975db70502811a34b06ad034ccdf2",
-			"revisionTime": "2016-07-07T19:03:55Z"
-		},
-		{
-			"checksumSHA1": "Vzb+dEH/LTYbvr8RXHmt6xJHz04=",
-			"path": "github.com/smartystreets/assertions/internal/go-render/render",
-			"revision": "2063fd1cc7c975db70502811a34b06ad034ccdf2",
-			"revisionTime": "2016-07-07T19:03:55Z"
-		},
-		{
-			"checksumSHA1": "SLC6TfV4icQA9l8YJQu8acJYbuo=",
-			"path": "github.com/smartystreets/assertions/internal/oglematchers",
-			"revision": "2063fd1cc7c975db70502811a34b06ad034ccdf2",
-			"revisionTime": "2016-07-07T19:03:55Z"
-		},
-		{
-			"checksumSHA1": "/mwAihy9AmznMzmbPQ5nWJXBiRU=",
-			"path": "github.com/smartystreets/goconvey/convey",
-			"revision": "7befa7fd6e2e8ca28d2b94f2d39111929904b08d",
-			"revisionTime": "2016-09-28T20:55:23Z"
-		},
-		{
-			"checksumSHA1": "9LakndErFi5uCXtY1KWl0iRnT4c=",
-			"path": "github.com/smartystreets/goconvey/convey/gotest",
-			"revision": "7befa7fd6e2e8ca28d2b94f2d39111929904b08d",
-			"revisionTime": "2016-09-28T20:55:23Z"
-		},
-		{
-			"checksumSHA1": "FWDhk37bhAwZ2363D/L2xePwR64=",
-			"path": "github.com/smartystreets/goconvey/convey/reporting",
-			"revision": "7befa7fd6e2e8ca28d2b94f2d39111929904b08d",
-			"revisionTime": "2016-09-28T20:55:23Z"
+			"checksumSHA1": "m4QwaQdvaqDo6Fp4BoykRkEFQ8E=",
+			"origin": "github.com/ONSdigital/dp-frontend-renderer/vendor/github.com/unrolled/render",
+			"path": "github.com/unrolled/render",
+			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
+			"revisionTime": "2016-10-27T12:41:44Z"
 		}
 	],
 	"rootPath": "github.com/ONSdigital/dp-content-resolver"

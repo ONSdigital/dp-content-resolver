@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
@@ -92,7 +93,8 @@ func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		log.Error(err, log.Data{"message": "Status code not 200"})
+		// TODO fix this properly.
+		fmt.Println("Status code not 200")
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(response.Body)
@@ -104,7 +106,7 @@ func (zebedee *Client) get(path string, params []parameter) ([]byte, error) {
 }
 
 func (zebedee *Client) buildGetRequest(url string, params []parameter) (*http.Request, error) {
-	request, err := http.NewRequest("GET", zebedee.url + url, nil)
+	request, err := http.NewRequest("GET", zebedee.url+url, nil)
 	if err != nil {
 		log.Error(err, log.Data{"message": "error creating zebedee request"})
 		return nil, nil
