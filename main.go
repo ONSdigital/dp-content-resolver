@@ -20,8 +20,12 @@ func main() {
         bindAddr = ":20020"
     }
 
-    // TODO MAKE ENV VAR ALL UPPER CASE
-    content.ZebedeeService = zebedee.CreateClient(time.Second * 2, "http://localhost:8082")
+    zebedeeURL := os.Getenv("ZEBEDEE_URL")
+    if len(zebedeeURL) == 0 {
+        zebedeeURL = "http://localhost:8082"
+    }
+
+    content.ZebedeeService = zebedee.CreateClient(time.Second * 2, zebedeeURL)
 
     log.Namespace = "dp-content-resolver"
 
@@ -32,7 +36,10 @@ func main() {
 
     router.Get("/{uri:.*}", handlers.Handle)
 
-    log.Debug("Starting server", log.Data{"bind_addr": bindAddr})
+    log.Debug("Starting server", log.Data{
+        "bind_addr": bindAddr,
+        "zebedee_url": zebedeeURL,
+    })
 
     if err := http.ListenAndServe(bindAddr, alice); err != nil {
         log.Error(err, nil)
