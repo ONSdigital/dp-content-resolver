@@ -1,21 +1,23 @@
 package content
 
 import (
-    "errors"
     "github.com/ONSdigital/dp-content-resolver/content/homePage"
     "github.com/ONSdigital/dp-content-resolver/zebedee"
     "encoding/json"
     zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
+    "net/http"
+    "github.com/ONSdigital/go-ns/common"
 )
 
-var pageTypeToResolver = map[string]func(string, zebedeeModel.HomePage, zebedee.Service) ([]byte, error){
+var pageTypeToResolver = map[string]func(*http.Request, zebedeeModel.HomePage, zebedee.Service) ([]byte, error){
     "home_page": homePage.Resolve,
 }
 
 var ZebedeeService zebedee.Service
 
 // Resolve will take a URL and return a resolved version of the data.
-func Resolve(uri string) ([]byte, error) {
+func Resolve(req *http.Request) ([]byte, *common.ONSError) {
+    uri := req.URL.Path
 
     zebedeeData, pageType, err := ZebedeeService.GetData(uri)
     if err != nil {
@@ -26,15 +28,19 @@ func Resolve(uri string) ([]byte, error) {
     resolveFunc := pageTypeToResolver[pageType]
 
     if resolveFunc == nil {
-        return nil, errors.New("Page type not recognised: " + pageType)
+        return nil, nil
     }
 
     var pageToResolve zebedeeModel.HomePage // zebedee model
     json.Unmarshal(zebedeeData, &pageToResolve)
 
-    resolvedData, err := resolveFunc(uri, pageToResolve, ZebedeeService)
-    if err != nil {
-        return nil, err
+    if pageToResolve.URI == "" {
+        pageToResolve.URI = "/"
     }
-    return resolvedData, err
+
+    resolvedData, error := resolveFunc(req, pageToResolve, ZebedeeService)
+    if err != nil {
+        return nil, common.NewONSError(error, "Resolve error...")
+    }
+    return resolvedData, nil
 }
