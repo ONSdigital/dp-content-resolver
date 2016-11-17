@@ -1,12 +1,14 @@
 dp-content-resolver
 ================
 
+App resolves ONS website page content for a give URL.
+
 ### Configuration
 
-| Environment variable | Default                  | Description
-| -------------------- | ------------------------ | -----------
-| BIND_ADDR            | :20020                   | The host and port to bind to.
-| ZEBEDEE_URL          | "http://localhost:8082"  | The Zebedee instance URL to use when resolving.
+| Environment variable | Default                 | Description
+| -------------------- | ----------------------- | -----------
+| BIND_ADDR            | :20020                  | The host and port to bind to.
+| ZEBEDEE_URL          | http://localhost:8082"  | The Zebedee instance URL to use when resolving.
 
 ### License
 
