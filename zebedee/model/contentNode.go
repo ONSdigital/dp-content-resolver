@@ -1,7 +1,7 @@
 package model
 
 import (
-	renderModel "github.com/ONSdigital/dp-frontend-renderer/model"
+	renderModel "github.com/ONSdigital/dp-frontend-models/model"
 )
 
 type ContentNode struct {

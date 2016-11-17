@@ -3,28 +3,34 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "38KleWC9zXTErRdT3EoP9mlPx3g=",
+			"path": "github.com/ONSdigital/dp-frontend-models/model",
+			"revision": "9dcb27f23a585ac12068d4b6b4edc666db9b8a5c",
+			"revisionTime": "2016-11-17T08:51:22Z"
+		},
+		{
+			"checksumSHA1": "p21064UH4tn085zUNAzvxjwhdvE=",
+			"path": "github.com/ONSdigital/dp-frontend-models/model/homepage",
+			"revision": "9dcb27f23a585ac12068d4b6b4edc666db9b8a5c",
+			"revisionTime": "2016-11-17T08:51:22Z"
+		},
+		{
 			"checksumSHA1": "rhIbkFbL85qBxViqDKc55tK2qUc=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/config",
-			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
-			"revisionTime": "2016-10-27T12:41:44Z"
+			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
+			"revisionTime": "2016-11-10T08:18:35Z"
 		},
 		{
-			"checksumSHA1": "X/9WEMN4W38BrAa9Mq/0IxQTLxw=",
+			"checksumSHA1": "fqsnReshZf2xzbYoPpMRg7guc1g=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/handlers/homepage",
-			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
-			"revisionTime": "2016-10-27T12:41:44Z"
-		},
-		{
-			"checksumSHA1": "WtiJ7T5yGlgF7S4dtvdIJxE5nZM=",
-			"path": "github.com/ONSdigital/dp-frontend-renderer/model",
-			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
-			"revisionTime": "2016-10-27T12:41:44Z"
+			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
+			"revisionTime": "2016-11-10T08:18:35Z"
 		},
 		{
 			"checksumSHA1": "TsGOSJlxHQ5lMSrwCWAVfFZ3f8w=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/render",
-			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
-			"revisionTime": "2016-10-27T12:41:44Z"
+			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
+			"revisionTime": "2016-11-10T08:18:35Z"
 		},
 		{
 			"checksumSHA1": "BHTuF0DcZdpuklc4j3Ik0rJlQSo=",
@@ -35,20 +41,20 @@
 		{
 			"checksumSHA1": "ei+/RCSa0XO9v9rQxAh0uqyJ/28=",
 			"path": "github.com/ONSdigital/go-ns/handlers/healthcheck",
-			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
-			"revisionTime": "2016-10-21T07:34:12Z"
+			"revision": "321646dcfb8316a12c5025a5ae88a97532efceb6",
+			"revisionTime": "2016-11-17T07:44:41Z"
 		},
 		{
 			"checksumSHA1": "J9OiPnhPHFPhQ+R+dq6LFj+dTxE=",
 			"path": "github.com/ONSdigital/go-ns/handlers/requestID",
-			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
-			"revisionTime": "2016-10-21T07:34:12Z"
+			"revision": "321646dcfb8316a12c5025a5ae88a97532efceb6",
+			"revisionTime": "2016-11-17T07:44:41Z"
 		},
 		{
 			"checksumSHA1": "t9V2N7/M260lThgot3Iv7a0wxd4=",
 			"path": "github.com/ONSdigital/go-ns/log",
-			"revision": "30d0db5220eaba5fdbf4bf3ec1c376c568a4bc5a",
-			"revisionTime": "2016-10-21T07:34:12Z"
+			"revision": "321646dcfb8316a12c5025a5ae88a97532efceb6",
+			"revisionTime": "2016-11-17T07:44:41Z"
 		},
 		{
 			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
@@ -126,8 +132,8 @@
 			"checksumSHA1": "m4QwaQdvaqDo6Fp4BoykRkEFQ8E=",
 			"origin": "github.com/ONSdigital/dp-frontend-renderer/vendor/github.com/unrolled/render",
 			"path": "github.com/unrolled/render",
-			"revision": "d1db3d9a04da25af8035e1365a77de1d61be7451",
-			"revisionTime": "2016-10-27T12:41:44Z"
+			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
+			"revisionTime": "2016-11-10T08:18:35Z"
 		}
 	],
 	"rootPath": "github.com/ONSdigital/dp-content-resolver"
