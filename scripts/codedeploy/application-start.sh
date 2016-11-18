@@ -16,9 +16,11 @@ else
   DOCKER_NETWORK=website
 fi
 
-source $CONFIG && docker run -d \
-  --env=BIND_ADDR=$BIND_ADDR    \
-  --name=content-resolver       \
-  --net=$DOCKER_NETWORK         \
-  --restart=always              \
+source $CONFIG && docker run -d  \
+  --env=BIND_ADDR=$BIND_ADDR     \
+  --env=HUMAN_LOG=$HUMAN_LOG     \
+  --env=ZEBEDEE_URL=$ZEBEDEE_URL \
+  --name=content-resolver        \
+  --net=$DOCKER_NETWORK          \
+  --restart=always               \
   $ECR_REPOSITORY_URI/content-resolver:$GIT_COMMIT
