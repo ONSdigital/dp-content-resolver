@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/ONSdigital/dp-content-resolver/babbage"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	renderModel "github.com/ONSdigital/dp-frontend-models/model"
@@ -47,7 +48,7 @@ func (r *ResolvedHeadline) isError() bool {
 }
 
 // Resolve the given page data.
-func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeService zebedee.Service) (resolvedPageData []byte, err error) {
+func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeService zebedee.Service, babbageService babbage.Service) (resolvedPageData []byte, err error) {
 	var resolvedPage homepage.Page = homepage.Page{URI: pageToResolve.URI}
 	var taxonomyErr *common.ONSError
 	var breadcrumbErr *common.ONSError
@@ -67,7 +68,7 @@ func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeServ
 	}()
 
 	go func() {
-		headlines = resolveHeadlineSections(pageToResolve.Sections, zebedeeService)
+		headlines = resolveHeadlineSections(pageToResolve.Sections, babbageService)
 		wg.Done()
 	}()
 
@@ -100,7 +101,7 @@ func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeServ
 	return
 }
 
-func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeService zebedee.Service) ResolvedHeadlines {
+func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, babbageService babbage.Service) ResolvedHeadlines {
 	results := make(ResolvedHeadlines, len(pageSections))
 	wg := new(sync.WaitGroup)
 	wg.Add(len(pageSections))
@@ -110,7 +111,7 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeSe
 			var timeSeriesPage *zebedeeModel.TimeseriesPage
 			var onsError *common.ONSError
 			var result *ResolvedHeadline
-			timeSeriesPage, onsError = getTimeSeriesPage(section.Statistics.URI, zebedeeService)
+			timeSeriesPage, onsError = getTimeSeriesPage(section.Statistics.URI, babbageService)
 
 			if onsError != nil {
 				onsError.AddParameter("resolveURI", section.Statistics.URI)
@@ -131,10 +132,10 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeSe
 	return results
 }
 
-func getTimeSeriesPage(uri string, zebedeeService zebedee.Service) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
-	data, err := zebedeeService.GetTimeSeries(uri)
+func getTimeSeriesPage(uri string, babbageService babbage.Service) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
+	data, err := babbageService.GetTimeSeries(uri)
 	if err != nil {
-		return nil, err
+		return nil, common.NewONSError(err, "Error calling babbage")
 	}
 
 	var page *zebedeeModel.TimeseriesPage
