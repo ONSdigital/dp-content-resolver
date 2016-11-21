@@ -15,25 +15,37 @@
 			"revisionTime": "2016-11-17T08:51:22Z"
 		},
 		{
-			"checksumSHA1": "rhIbkFbL85qBxViqDKc55tK2qUc=",
+			"checksumSHA1": "55ccvEs++XAwkDFnrb35t8SN+E4=",
+			"origin": "github.com/ONSdigital/dp-content-resolver/vendor/github.com/ONSdigital/dp-frontend-renderer-models/common",
+			"path": "github.com/ONSdigital/dp-frontend-renderer-models/common",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "/co15FkHjDHpt0FSED/3zfvGcJg=",
+			"origin": "github.com/ONSdigital/dp-content-resolver/vendor/github.com/ONSdigital/dp-frontend-renderer-models/homepage",
+			"path": "github.com/ONSdigital/dp-frontend-renderer-models/homepage",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "vlI2KCrn0ARDsberdqxpc3r8qFE=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/config",
-			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
-			"revisionTime": "2016-11-10T08:18:35Z"
+			"revision": "a850eab31874681835f3374e75d0826947e664b0",
+			"revisionTime": "2016-11-17T09:42:39Z"
 		},
 		{
 			"checksumSHA1": "fqsnReshZf2xzbYoPpMRg7guc1g=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/handlers/homepage",
-			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
-			"revisionTime": "2016-11-10T08:18:35Z"
+			"revision": "a850eab31874681835f3374e75d0826947e664b0",
+			"revisionTime": "2016-11-17T09:42:39Z"
 		},
 		{
 			"checksumSHA1": "TsGOSJlxHQ5lMSrwCWAVfFZ3f8w=",
 			"path": "github.com/ONSdigital/dp-frontend-renderer/render",
-			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
-			"revisionTime": "2016-11-10T08:18:35Z"
+			"revision": "a850eab31874681835f3374e75d0826947e664b0",
+			"revisionTime": "2016-11-17T09:42:39Z"
 		},
 		{
-			"checksumSHA1": "BHTuF0DcZdpuklc4j3Ik0rJlQSo=",
+			"checksumSHA1": "Y/BP8MFZno4xgKRfnxsoBi49tHw=",
 			"path": "github.com/ONSdigital/go-ns/common",
 			"revision": "321646dcfb8316a12c5025a5ae88a97532efceb6",
 			"revisionTime": "2016-11-17T07:44:41Z"
@@ -132,8 +144,8 @@
 			"checksumSHA1": "m4QwaQdvaqDo6Fp4BoykRkEFQ8E=",
 			"origin": "github.com/ONSdigital/dp-frontend-renderer/vendor/github.com/unrolled/render",
 			"path": "github.com/unrolled/render",
-			"revision": "34a5f73d3cb032cb7ac4861cf794e2299248ad85",
-			"revisionTime": "2016-11-10T08:18:35Z"
+			"revision": "a850eab31874681835f3374e75d0826947e664b0",
+			"revisionTime": "2016-11-17T09:42:39Z"
 		}
 	],
 	"rootPath": "github.com/ONSdigital/dp-content-resolver"
