@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"encoding/json"
 	"github.com/ONSdigital/dp-content-resolver/requests"
+	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	"github.com/ONSdigital/go-ns/common"
 	"github.com/ONSdigital/go-ns/log"
 )
@@ -91,18 +93,56 @@ func (zebedee *Client) GetData(uri string, requestContextID string) (data []byte
 }
 
 // GetTaxonomy gets the taxonomy structure of the website from Zebedee
-func (zebedee *Client) GetTaxonomy(uri string, depth int, requestContextID string) ([]byte, *common.ONSError) {
-	return zebedee.get(taxonomyAPI, requestContextID, []parameter{{name: uriParam, value: uri}, {name: "depth", value: strconv.Itoa(depth)}})
+func (zebedee *Client) GetTaxonomy(uri string, depth int, requestContextID string) ([]zebedeeModel.ContentNode, *common.ONSError) {
+	var zebedeeContentNodeList []zebedeeModel.ContentNode
+	params := []parameter{
+		{name: uriParam, value: uri},
+		{name: "depth", value: strconv.Itoa(depth)},
+	}
+	zebedeeBytes, err := zebedee.get(taxonomyAPI, requestContextID, params)
+
+	if err != nil {
+		return zebedeeContentNodeList, err
+	}
+
+	unmarshallErr := json.Unmarshal(zebedeeBytes, &zebedeeContentNodeList)
+	if unmarshallErr != nil {
+		return zebedeeContentNodeList, errorWithReqContextID(unmarshallErr, "Error while attempting to unmarshal content taxonomy nodes.", requestContextID)
+	}
+	return zebedeeContentNodeList, nil
 }
 
 // GetParents gets the breadcrumb for the given url.
-func (zebedee *Client) GetParents(uri string, requestContextID string) ([]byte, *common.ONSError) {
-	return zebedee.get(breadcrumbAPI, requestContextID, []parameter{{name: uriParam, value: uri}})
+func (zebedee *Client) GetParents(uri string, requestContextID string) ([]zebedeeModel.ContentNode, *common.ONSError) {
+	var zebedeeContentNodes []zebedeeModel.ContentNode
+	zebedeeBytes, err := zebedee.get(breadcrumbAPI, requestContextID, []parameter{{name: uriParam, value: uri}})
+
+	if err != nil {
+		return zebedeeContentNodes, err
+	}
+
+	unmarshallErr := json.Unmarshal(zebedeeBytes, &zebedeeContentNodes)
+	if unmarshallErr != nil {
+		return zebedeeContentNodes, errorWithReqContextID(err, "error unmarshalling zebedee contentNodes", requestContextID)
+	}
+	return zebedeeContentNodes, nil
 }
 
 // GetTimeSeries - get timeseries data.json from Zebedee.
-func (zebedee *Client) GetTimeSeries(uri string, requestContextID string) ([]byte, *common.ONSError) {
-	return zebedee.get(dataAPI, requestContextID, []parameter{{name: uriParam, value: uri}, {name: "series"}})
+func (zebedee *Client) GetTimeSeries(uri string, requestContextID string) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
+	params := []parameter{{name: uriParam, value: uri}, {name: "series"}}
+	zebedeeBytes, err := zebedee.get(dataAPI, requestContextID, params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var timeSeriesPage *zebedeeModel.TimeseriesPage
+	unmarshalErr := json.Unmarshal(zebedeeBytes, &timeSeriesPage)
+	if unmarshalErr != nil {
+		return nil, errorWithReqContextID(unmarshalErr, "Error unmarshalling timeseries pages json.", requestContextID)
+	}
+	return timeSeriesPage, nil
 }
 
 // Perform a HTTP GET request to zebedee for the specified uri & parameters.

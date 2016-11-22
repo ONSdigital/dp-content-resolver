@@ -14,6 +14,8 @@ import (
 	"sync"
 )
 
+var ZebedeeService zebedee.Service
+
 type resolvedHeadlines []*resolvedHeadline
 
 type resolvedHeadline struct {
@@ -47,7 +49,7 @@ func (r *resolvedHeadline) isError() bool {
 }
 
 // Resolve the given page data.
-func Resolve(req *http.Request, reqContentIDGen requests.ContextIDGenerator, pageToResolve zebedeeModel.HomePage, zebedeeService zebedee.Service) (resolvedPageData []byte, err error) {
+func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, reqContentIDGen requests.ContextIDGenerator) (resolvedPageData []byte, err error) {
 	var resolvedPage = homepage.Page{URI: pageToResolve.URI}
 	var taxonomyErr *common.ONSError
 	var breadcrumbErr *common.ONSError
@@ -57,17 +59,17 @@ func Resolve(req *http.Request, reqContentIDGen requests.ContextIDGenerator, pag
 	wg.Add(3)
 
 	go func() {
-		resolvedPage.Taxonomy, taxonomyErr = resolveTaxonomy(resolvedPage.URI, zebedeeService, reqContentIDGen)
+		resolvedPage.Taxonomy, taxonomyErr = resolveTaxonomy(resolvedPage.URI, reqContentIDGen)
 		wg.Done()
 	}()
 
 	go func() {
-		resolvedPage.Breadcrumb, breadcrumbErr = resolveParents(resolvedPage.URI, zebedeeService, reqContentIDGen)
+		resolvedPage.Breadcrumb, breadcrumbErr = resolveParents(resolvedPage.URI, reqContentIDGen)
 		wg.Done()
 	}()
 
 	go func() {
-		headlines = resolveHeadlineSections(pageToResolve.Sections, zebedeeService, reqContentIDGen)
+		headlines = resolveHeadlineSections(pageToResolve.Sections, reqContentIDGen)
 		wg.Done()
 	}()
 
@@ -100,7 +102,7 @@ func Resolve(req *http.Request, reqContentIDGen requests.ContextIDGenerator, pag
 	return
 }
 
-func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) resolvedHeadlines {
+func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, reqContextIDGen requests.ContextIDGenerator) resolvedHeadlines {
 	results := make(resolvedHeadlines, len(pageSections))
 	wg := new(sync.WaitGroup)
 	wg.Add(len(pageSections))
@@ -111,7 +113,7 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeSe
 			var timeSeriesPage *zebedeeModel.TimeseriesPage
 			var onsError *common.ONSError
 			var result *resolvedHeadline
-			timeSeriesPage, onsError = getTimeSeriesPage(section.Statistics.URI, reqContextIDGen.Generate(), zebedeeService)
+			timeSeriesPage, onsError = ZebedeeService.GetTimeSeries(section.Statistics.URI, reqContextIDGen.Generate())
 
 			if onsError != nil {
 				onsError.AddParameter("resolveURI", section.Statistics.URI)
@@ -131,21 +133,6 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeSe
 	}
 	wg.Wait()
 	return results
-}
-
-func getTimeSeriesPage(uri string, requestID string, zebedeeService zebedee.Service) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
-	data, err := zebedeeService.GetTimeSeries(uri, requestID)
-	if err != nil {
-		return nil, err
-	}
-
-	var page *zebedeeModel.TimeseriesPage
-	unmarshalErr := json.Unmarshal(data, &page)
-	if unmarshalErr != nil {
-		return nil, common.NewONSError(unmarshalErr, "Error unmarshalling timeseries pages json.")
-	}
-
-	return page, nil
 }
 
 func mapTimeseriesToHeadlineFigure(page *zebedeeModel.TimeseriesPage) (figure *homepage.HeadlineFigure) {
@@ -175,46 +162,31 @@ func mapTimeseriesToHeadlineFigure(page *zebedeeModel.TimeseriesPage) (figure *h
 	return figure
 }
 
-func resolveTaxonomy(uri string, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
+func resolveTaxonomy(uri string, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
 	var rendererTaxonomyList []renderModel.TaxonomyNode
-	var zebedeeContentNodeList []zebedeeModel.ContentNode
-	var zebedeeContentNodeBytes []byte
-	zebedeeContentNodeBytes, err := zebedeeService.GetTaxonomy(uri, 2, reqContextIDGen.Generate())
+	zebedeeContentNodeList, err := ZebedeeService.GetTaxonomy(uri, 2, reqContextIDGen.Generate())
 
 	if err != nil {
 		return rendererTaxonomyList, err
 	}
 
-	unmarshallErr := json.Unmarshal(zebedeeContentNodeBytes, &zebedeeContentNodeList)
-	if unmarshallErr != nil {
-		return rendererTaxonomyList, common.NewONSError(unmarshallErr, "Error while attempting to unmarshal content taxonomy nodes.")
+	for _, zebedeeContentNode := range zebedeeContentNodeList {
+		rendererTaxonomyList = append(rendererTaxonomyList, zebedeeContentNode.Map())
 	}
-	return contentNodeListToTaxonomyList(zebedeeContentNodeList), nil
+	return rendererTaxonomyList, nil
 }
 
-// Resolve the breadcrumbs for this page.
-func resolveParents(uri string, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
-	var taxonomyList []renderModel.TaxonomyNode
-	zebedeeBytes, err := zebedeeService.GetParents(uri, reqContextIDGen.Generate())
+// resolveParents get the parents data from zebedee and convert it into the renderer model.
+func resolveParents(uri string, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
+	var taxonomyNodeList []renderModel.TaxonomyNode
+	zebedeeContentNodes, err := ZebedeeService.GetParents(uri, reqContextIDGen.Generate())
 
 	if err != nil {
-		return taxonomyList, err
+		return taxonomyNodeList, err
 	}
 
-	var contentNodes []zebedeeModel.ContentNode
-	unmarshallErr := json.Unmarshal(zebedeeBytes, &contentNodes)
-
-	if unmarshallErr != nil {
-		return taxonomyList, common.NewONSError(unmarshallErr, "Error while attempting to unmarshal parent content nodes.")
+	for _, zebedeeContentNode := range zebedeeContentNodes {
+		taxonomyNodeList = append(taxonomyNodeList, zebedeeContentNode.Map())
 	}
-
-	taxonomyList = contentNodeListToTaxonomyList(contentNodes)
-	return taxonomyList, nil
-}
-
-func contentNodeListToTaxonomyList(contentNodes []zebedeeModel.ContentNode) (taxonomyList []renderModel.TaxonomyNode) {
-	for _, zebedeeContentNode := range contentNodes {
-		taxonomyList = append(taxonomyList, zebedeeContentNode.Map())
-	}
-	return taxonomyList
+	return taxonomyNodeList, nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ONSdigital/dp-content-resolver/content"
+	"github.com/ONSdigital/dp-content-resolver/content/homePage"
 	"github.com/ONSdigital/dp-content-resolver/handlers"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
@@ -25,7 +26,9 @@ func main() {
 		zebedeeURL = "http://localhost:8082"
 	}
 
-	content.ZebedeeService = zebedee.CreateClient(time.Second*2, zebedeeURL)
+	zebedeeSerivce := zebedee.CreateClient(time.Second*2, zebedeeURL)
+	content.ZebedeeService = zebedeeSerivce
+	homePage.ZebedeeService = zebedeeSerivce
 
 	log.Namespace = "dp-content-resolver"
 
