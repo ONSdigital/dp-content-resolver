@@ -19,6 +19,7 @@ fi
 (aws s3 cp s3://$CONFIG_BUCKET/content-resolver/$CONFIG_DIRECTORY/$CONFIG.asc . && gpg --decrypt $CONFIG.asc > $CONFIG) || exit $?
 
 source $CONFIG && docker run -d  \
+  --env=BABBAGE_URL=$BABBAGE_URL \
   --env=BIND_ADDR=$BIND_ADDR     \
   --env=HUMAN_LOG=$HUMAN_LOG     \
   --env=ZEBEDEE_URL=$ZEBEDEE_URL \
