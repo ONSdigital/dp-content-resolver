@@ -7,6 +7,7 @@ import (
 type ContentNode struct {
 	URI         string          `json:"uri"`
 	Description PageDescription `json:"description"`
+	PageType    string          `json:"type"`
 	Children    []ContentNode   `json:"children,omitempty"`
 }
 

@@ -16,6 +16,8 @@ import (
 
 var ZebedeeService zebedee.Service
 
+const taxonomyLandingPageType = "taxonomy_landing_page"
+
 type resolvedHeadlines []*resolvedHeadline
 
 type resolvedHeadline struct {
@@ -136,7 +138,6 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, reqContex
 }
 
 func mapTimeseriesToHeadlineFigure(page *zebedeeModel.TimeseriesPage) (figure *homepage.HeadlineFigure) {
-
 	figure = &homepage.HeadlineFigure{
 		Title: page.Description.Title,
 	}
@@ -171,7 +172,9 @@ func resolveTaxonomy(uri string, reqContextIDGen requests.ContextIDGenerator) ([
 	}
 
 	for _, zebedeeContentNode := range zebedeeContentNodeList {
-		rendererTaxonomyList = append(rendererTaxonomyList, zebedeeContentNode.Map())
+		if zebedeeContentNode.PageType == taxonomyLandingPageType {
+			rendererTaxonomyList = append(rendererTaxonomyList, zebedeeContentNode.Map())
+		}
 	}
 	return rendererTaxonomyList, nil
 }
