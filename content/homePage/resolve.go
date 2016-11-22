@@ -3,6 +3,9 @@ package homePage
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"sync"
+
 	"github.com/ONSdigital/dp-content-resolver/requests"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
@@ -10,8 +13,6 @@ import (
 	"github.com/ONSdigital/dp-frontend-models/model/homepage"
 	"github.com/ONSdigital/go-ns/common"
 	"github.com/ONSdigital/go-ns/log"
-	"net/http"
-	"sync"
 )
 
 type resolvedHeadlines []*resolvedHeadline

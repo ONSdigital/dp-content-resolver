@@ -6,6 +6,7 @@ import (
 
 	"github.com/ONSdigital/dp-content-resolver/content"
 	"github.com/ONSdigital/dp-content-resolver/model"
+	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/go-ns/log"
 )
 
@@ -23,8 +24,14 @@ func Handle(w http.ResponseWriter, req *http.Request) {
 
 	data, err := Resolve(req)
 	if err != nil {
+		if err.RootError == zebedee.ErrUnauthorised {
+			w.WriteHeader(401)
+			return
+		}
+
 		writeErrorResponse(err, w)
 		log.ErrorR(req, err, nil)
+		return
 	}
 
 	w.WriteHeader(200)

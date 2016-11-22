@@ -22,6 +22,7 @@ const zebedeeGetError = "GET zebedee/data request returned an unexpected error."
 const requestContextIDParam = "requestContextId"
 
 var incorrectStatusCodeErrDesc = "Incorrect status code."
+var ErrUnauthorised = errors.New("unauthorised user")
 
 // httpClient provides only the methods of http.client that we are using allowing it to be mocked.
 type httpClient interface {
@@ -70,6 +71,9 @@ func (zebedee *Client) GetData(uri string, requestContextID string) (data []byte
 	}
 
 	if response.StatusCode != 200 {
+		if response.StatusCode == 401 {
+			return nil, "", common.NewONSError(ErrUnauthorised, "-_-")
+		}
 		onsErr := errorWithReqContextID(errors.New("Unexpected Response status code"), incorrectStatusCodeErrDesc, requestContextID)
 		onsErr.AddParameter("zebedeeURI", request.URL.Path)
 		onsErr.AddParameter("expectedStatusCode", 200)
