@@ -3,26 +3,26 @@ package homePage
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"sync"
-
+	"github.com/ONSdigital/dp-content-resolver/requests"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	renderModel "github.com/ONSdigital/dp-frontend-models/model"
 	"github.com/ONSdigital/dp-frontend-models/model/homepage"
 	"github.com/ONSdigital/go-ns/common"
 	"github.com/ONSdigital/go-ns/log"
+	"net/http"
+	"sync"
 )
 
-type ResolvedHeadlines []*ResolvedHeadline
+type resolvedHeadlines []*resolvedHeadline
 
-type ResolvedHeadline struct {
+type resolvedHeadline struct {
 	headline *homepage.HeadlineFigure
 	err      error
 	meta     log.Data
 }
 
-func (r ResolvedHeadlines) countErrors() int {
+func (r resolvedHeadlines) countErrors() int {
 	count := 0
 	for _, i := range r {
 		if i.isError() {
@@ -32,8 +32,8 @@ func (r ResolvedHeadlines) countErrors() int {
 	return count
 }
 
-func (r ResolvedHeadlines) getFailures() []*ResolvedHeadline {
-	failures := make([]*ResolvedHeadline, 0)
+func (r resolvedHeadlines) getFailures() []*resolvedHeadline {
+	failures := make([]*resolvedHeadline, 0)
 	for _, item := range r {
 		if item.isError() {
 			failures = append(failures, item)
@@ -42,32 +42,32 @@ func (r ResolvedHeadlines) getFailures() []*ResolvedHeadline {
 	return failures
 }
 
-func (r *ResolvedHeadline) isError() bool {
+func (r *resolvedHeadline) isError() bool {
 	return r.err != nil
 }
 
 // Resolve the given page data.
-func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeService zebedee.Service) (resolvedPageData []byte, err error) {
-	var resolvedPage homepage.Page = homepage.Page{URI: pageToResolve.URI}
+func Resolve(req *http.Request, reqContentIDGen requests.ContextIDGenerator, pageToResolve zebedeeModel.HomePage, zebedeeService zebedee.Service) (resolvedPageData []byte, err error) {
+	var resolvedPage = homepage.Page{URI: pageToResolve.URI}
 	var taxonomyErr *common.ONSError
 	var breadcrumbErr *common.ONSError
-	var headlines ResolvedHeadlines
+	var headlines resolvedHeadlines
 
 	wg := new(sync.WaitGroup)
 	wg.Add(3)
 
 	go func() {
-		resolvedPage.Taxonomy, taxonomyErr = resolveTaxonomy(resolvedPage.URI, zebedeeService)
+		resolvedPage.Taxonomy, taxonomyErr = resolveTaxonomy(resolvedPage.URI, zebedeeService, reqContentIDGen)
 		wg.Done()
 	}()
 
 	go func() {
-		resolvedPage.Breadcrumb, breadcrumbErr = resolveParents(resolvedPage.URI, zebedeeService)
+		resolvedPage.Breadcrumb, breadcrumbErr = resolveParents(resolvedPage.URI, zebedeeService, reqContentIDGen)
 		wg.Done()
 	}()
 
 	go func() {
-		headlines = resolveHeadlineSections(pageToResolve.Sections, zebedeeService)
+		headlines = resolveHeadlineSections(pageToResolve.Sections, zebedeeService, reqContentIDGen)
 		wg.Done()
 	}()
 
@@ -100,27 +100,29 @@ func Resolve(req *http.Request, pageToResolve zebedeeModel.HomePage, zebedeeServ
 	return
 }
 
-func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeService zebedee.Service) ResolvedHeadlines {
-	results := make(ResolvedHeadlines, len(pageSections))
+func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) resolvedHeadlines {
+	results := make(resolvedHeadlines, len(pageSections))
 	wg := new(sync.WaitGroup)
 	wg.Add(len(pageSections))
 
 	for i, section := range pageSections {
 		go func(index int, section *zebedeeModel.HomeSection) {
+
 			var timeSeriesPage *zebedeeModel.TimeseriesPage
 			var onsError *common.ONSError
-			var result *ResolvedHeadline
-			timeSeriesPage, onsError = getTimeSeriesPage(section.Statistics.URI, zebedeeService)
+			var result *resolvedHeadline
+			timeSeriesPage, onsError = getTimeSeriesPage(section.Statistics.URI, reqContextIDGen.Generate(), zebedeeService)
 
 			if onsError != nil {
 				onsError.AddParameter("resolveURI", section.Statistics.URI)
 				onsError.AddParameter("description", "Failed to resolve headline section.")
 
-				result = &ResolvedHeadline{
-					err: onsError,
+				result = &resolvedHeadline{
+					err:  onsError.RootError,
+					meta: onsError.Parameters,
 				}
 			} else {
-				result = &ResolvedHeadline{headline: mapTimeseriesToHeadlineFigure(timeSeriesPage)}
+				result = &resolvedHeadline{headline: mapTimeseriesToHeadlineFigure(timeSeriesPage)}
 			}
 
 			results[index] = result
@@ -131,8 +133,8 @@ func resolveHeadlineSections(pageSections []*zebedeeModel.HomeSection, zebedeeSe
 	return results
 }
 
-func getTimeSeriesPage(uri string, zebedeeService zebedee.Service) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
-	data, err := zebedeeService.GetTimeSeries(uri)
+func getTimeSeriesPage(uri string, requestID string, zebedeeService zebedee.Service) (*zebedeeModel.TimeseriesPage, *common.ONSError) {
+	data, err := zebedeeService.GetTimeSeries(uri, requestID)
 	if err != nil {
 		return nil, err
 	}
@@ -173,12 +175,11 @@ func mapTimeseriesToHeadlineFigure(page *zebedeeModel.TimeseriesPage) (figure *h
 	return figure
 }
 
-func resolveTaxonomy(uri string, zebedeeService zebedee.Service) ([]renderModel.TaxonomyNode, *common.ONSError) {
+func resolveTaxonomy(uri string, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
 	var rendererTaxonomyList []renderModel.TaxonomyNode
 	var zebedeeContentNodeList []zebedeeModel.ContentNode
 	var zebedeeContentNodeBytes []byte
-
-	zebedeeContentNodeBytes, err := zebedeeService.GetTaxonomy(uri, 2)
+	zebedeeContentNodeBytes, err := zebedeeService.GetTaxonomy(uri, 2, reqContextIDGen.Generate())
 
 	if err != nil {
 		return rendererTaxonomyList, err
@@ -192,9 +193,9 @@ func resolveTaxonomy(uri string, zebedeeService zebedee.Service) ([]renderModel.
 }
 
 // Resolve the breadcrumbs for this page.
-func resolveParents(uri string, zebedeeService zebedee.Service) ([]renderModel.TaxonomyNode, *common.ONSError) {
+func resolveParents(uri string, zebedeeService zebedee.Service, reqContextIDGen requests.ContextIDGenerator) ([]renderModel.TaxonomyNode, *common.ONSError) {
 	var taxonomyList []renderModel.TaxonomyNode
-	zebedeeBytes, err := zebedeeService.GetParents(uri)
+	zebedeeBytes, err := zebedeeService.GetParents(uri, reqContextIDGen.Generate())
 
 	if err != nil {
 		return taxonomyList, err
