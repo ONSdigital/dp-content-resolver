@@ -63,6 +63,7 @@ func (zebedee *Client) GetData(uri string, requestContextID string) (data []byte
 		return data, pageType, errorWithReqContextID(error, "error creating zebedee request.", requestContextID)
 	}
 
+	log.Debug("Zebedee Client HTTP GetData", getLogData(request, requestContextID))
 	response, error = zebedee.httpClient.Do(request)
 
 	if error != nil {
@@ -112,12 +113,8 @@ func (zebedee *Client) get(path string, requestContextID string, params []parame
 		return nil, errorWithReqContextID(err, "error creating zebedee request", requestContextID)
 	}
 
-	log.Debug("Zebedee Client HTTP GET", log.Data{
-		"uri":                 request.URL.Path,
-		"method":              "GET",
-		requestContextIDParam: requestContextID,
-		"query":               request.URL.RawQuery,
-	})
+	log.Debug("Zebedee Client HTTP GET", getLogData(request, requestContextID))
+
 	response, err := zebedee.httpClient.Do(request)
 	defer response.Body.Close()
 
@@ -169,4 +166,13 @@ func errorWithReqContextID(e error, description string, requestContextID string)
 	err = common.NewONSError(e, description)
 	err.AddParameter(requestContextIDParam, requestContextID)
 	return
+}
+
+func getLogData(request *http.Request, requestContextID string) log.Data {
+	return log.Data{
+		"uri":                 request.URL.Path,
+		"method":              "GET",
+		requestContextIDParam: requestContextID,
+		"query":               request.URL.RawQuery,
+	}
 }
