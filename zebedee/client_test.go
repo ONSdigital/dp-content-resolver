@@ -3,6 +3,7 @@ package zebedee
 import (
 	"bytes"
 	"errors"
+	"github.com/ONSdigital/dp-content-resolver/requests"
 	"github.com/ONSdigital/go-ns/common"
 	. "github.com/smartystreets/goconvey/convey"
 	"io"
@@ -13,6 +14,9 @@ import (
 )
 
 const requestContextID = "1234"
+const protocol = "http://"
+const zebedeeURI = "zebedeeUri"
+const baseZebedeeURL = protocol + zebedeeURI
 
 // Set these with the values you want to be returned for your test case.
 var responseStub *http.Response
@@ -46,7 +50,7 @@ func TestGetData(t *testing.T) {
 	testHTTPClient := &testClient{}
 
 	// inject it into an instance of zebedeeHTTPClient
-	zebedeeClient := Client{testHTTPClient, "http://zebedeeUri"}
+	zebedeeClient := Client{testHTTPClient, baseZebedeeURL}
 
 	Convey("Should return empty data, page type and correct error if zebedee.get data fails.", t, func() {
 
@@ -133,5 +137,22 @@ func TestGetData(t *testing.T) {
 		So(err, ShouldResemble, onsErrorStub)
 		So(data, ShouldResemble, dataStub)
 		So(pageType, ShouldEqual, pageTypeStub)
+	})
+}
+
+func TestBuildRequest(t *testing.T) {
+	// create stub http client for test
+	testHTTPClient := &testClient{}
+	zebedeeClient := Client{testHTTPClient, zebedeeURI}
+
+	Convey("Should build the expected request for the given parameters.", t, func() {
+		uriParameter := "/someURL"
+		params := []parameter{{"name1", "value1"}}
+		actual, err := zebedeeClient.buildGetRequest(uriParameter, requestContextID, params)
+
+		So(err, ShouldBeEmpty)
+		So(actual.URL.Path, ShouldEqual, zebedeeURI+uriParameter)
+		So(actual.Method, ShouldEqual, "GET")
+		So(actual.Header.Get(requests.RequestIDHeaderParam), ShouldResemble, requestContextID)
 	})
 }
