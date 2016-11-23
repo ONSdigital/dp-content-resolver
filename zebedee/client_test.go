@@ -2,8 +2,10 @@ package zebedee
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"github.com/ONSdigital/dp-content-resolver/requests"
+	"github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	"github.com/ONSdigital/go-ns/common"
 	. "github.com/smartystreets/goconvey/convey"
 	"io"
@@ -32,7 +34,7 @@ type testClient struct{}
 
 func (*testClient) Get(url string) (resp *http.Response, err error) {
 	recorder := httptest.NewRecorder()
-	recorder.Header().Add("ONS-Page-Type", "home_page")
+	recorder.Header().Add("ONS-Page-Type", HomePage)
 	return recorder.Result(), nil
 }
 
@@ -103,7 +105,7 @@ func TestGetData(t *testing.T) {
 
 		responseStub = &http.Response{StatusCode: 200}
 		responseStub.Header = make(map[string][]string, 0)
-		responseStub.Header.Set(pageTypeHeader, "home_page")
+		responseStub.Header.Set(pageTypeHeader, HomePage)
 		responseStub.Body = ioutil.NopCloser(bytes.NewBufferString(""))
 		responseBodyReadErrStub = rootErr
 		responseBodyBytesStub = []byte("")
@@ -122,12 +124,12 @@ func TestGetData(t *testing.T) {
 		body := "I am Success!"
 
 		dataStub = []byte(body)
-		pageTypeStub = "home_page"
+		pageTypeStub = HomePage
 		onsErrorStub = nil
 
 		responseStub = &http.Response{StatusCode: 200}
 		responseStub.Header = make(map[string][]string, 0)
-		responseStub.Header.Set(pageTypeHeader, "home_page")
+		responseStub.Header.Set(pageTypeHeader, HomePage)
 		responseStub.Body = ioutil.NopCloser(bytes.NewBufferString(body))
 		responseBodyReadErrStub = nil
 		responseBodyBytesStub = []byte(body)
@@ -155,4 +157,87 @@ func TestBuildRequest(t *testing.T) {
 		So(actual.Method, ShouldEqual, "GET")
 		So(actual.Header.Get(requests.RequestIDHeaderParam), ShouldResemble, requestContextID)
 	})
+}
+
+func TestGetParents(t *testing.T) {
+	testHTTPClient := &testClient{}
+	zebedeeClient := Client{testHTTPClient, zebedeeURI}
+
+	Convey("Should return parents for 200 response status & valid response body.", t, func() {
+		// Set a mock for reading the response body.
+		zebedeeClient.setResponseReader(ReadBodyMock)
+		// Get some mock parents data.
+		zebedeeParents := getZebedeeParents()
+
+		// Set up the stub data for this test case.
+		zebedeeBytes, _ := json.Marshal(zebedeeParents)
+
+		responseBody := string(zebedeeBytes)
+		pageTypeStub = HomePage
+		onsErrorStub = nil
+		responseStub = &http.Response{StatusCode: 200}
+		responseStub.Header = make(map[string][]string, 0)
+		responseStub.Header.Set(pageTypeHeader, HomePage)
+		responseStub.Body = ioutil.NopCloser(bytes.NewBufferString(string(responseBody)))
+		responseBodyReadErrStub = nil
+		responseBodyBytesStub = zebedeeBytes
+
+		result, err := zebedeeClient.GetParents("/", requestContextID)
+		So(result, ShouldResemble, zebedeeParents)
+		So(len(result), ShouldEqual, len(zebedeeParents))
+		So(err, ShouldBeNil)
+	})
+
+	Convey("Should error if response status is not 200.", t, func() {
+		// Set a mock for reading the response body.
+		zebedeeClient.setResponseReader(ReadBodyMock)
+
+		responseBody := "I am an error."
+		var expectedParents []model.ContentNode
+
+		onsErrorStub = errorWithReqContextID(errors.New("Unexpected Response status code"), incorrectStatusCodeErrDesc, requestContextID)
+		onsErrorStub.AddParameter("expectedStatusCode", 200)
+		onsErrorStub.AddParameter("actualStatusCode", 500)
+		onsErrorStub.AddParameter("zebedeeURI", zebedeeURI+breadcrumbAPI)
+		onsErrorStub.AddParameter(requestContextIDParam, requestContextID)
+
+		pageTypeStub = HomePage
+		responseStub = &http.Response{StatusCode: 500}
+		responseStub.Header = make(map[string][]string, 0)
+		responseStub.Header.Set(pageTypeHeader, HomePage)
+		responseStub.Body = ioutil.NopCloser(bytes.NewBufferString(responseBody))
+		responseBodyReadErrStub = nil
+		responseBodyBytesStub = []byte(responseBody)
+
+		result, err := zebedeeClient.GetParents("/", requestContextID)
+		So(result, ShouldResemble, expectedParents)
+		So(err, ShouldResemble, onsErrorStub)
+	})
+
+	Convey("Should error if response body is invalid.", t, func() {
+		// Set a mock for reading the response body.
+		zebedeeClient.setResponseReader(ReadBodyMock)
+
+		responseBody := "I am an error."
+		var expectedParents []model.ContentNode
+
+		onsErrorStub = errorWithReqContextID(errors.New(""), "error unmarshalling zebedee contentNodes", requestContextID)
+		pageTypeStub = HomePage
+		responseStub = &http.Response{StatusCode: 200}
+		responseStub.Header = make(map[string][]string, 0)
+		responseStub.Header.Set(pageTypeHeader, HomePage)
+		responseStub.Body = ioutil.NopCloser(bytes.NewBufferString(responseBody))
+		responseBodyReadErrStub = nil
+		responseBodyBytesStub = []byte(responseBody)
+
+		result, err := zebedeeClient.GetParents("/", requestContextID)
+		So(result, ShouldResemble, expectedParents)
+		So(err.Parameters, ShouldResemble, onsErrorStub.Parameters)
+	})
+}
+
+func getZebedeeParents() []model.ContentNode {
+	child := model.ContentNode{URI: "/one"}
+	parent := model.ContentNode{URI: "/", Children: []model.ContentNode{child}}
+	return []model.ContentNode{parent}
 }

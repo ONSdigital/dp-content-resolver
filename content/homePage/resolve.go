@@ -14,9 +14,8 @@ import (
 	"sync"
 )
 
+// ZebedeeService service provides functionality for sending HTTP Get requests to Zebedee.
 var ZebedeeService zebedee.Service
-
-const taxonomyLandingPageType = "taxonomy_landing_page"
 
 type resolvedHeadlines []*resolvedHeadline
 
@@ -172,7 +171,7 @@ func resolveTaxonomy(uri string, reqContextIDGen requests.ContextIDGenerator) ([
 	}
 
 	for _, zebedeeContentNode := range zebedeeContentNodeList {
-		if zebedeeContentNode.PageType == taxonomyLandingPageType {
+		if zebedeeContentNode.PageType == zebedee.TaxonomyLandingPage {
 			rendererTaxonomyList = append(rendererTaxonomyList, zebedeeContentNode.Map())
 		}
 	}

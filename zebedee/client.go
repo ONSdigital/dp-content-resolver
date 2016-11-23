@@ -174,7 +174,7 @@ func (zebedee *Client) get(path string, requestContextID string, params []parame
 		return nil, onsError
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := resReader(response.Body)
 	if err != nil {
 		return nil, errorWithReqContextID(err, "error reading zebedee response body", requestContextID)
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 var pageTypeToResolver = map[string]func(*http.Request, zebedeeModel.HomePage, requests.ContextIDGenerator) ([]byte, error){
-	"home_page": homePage.Resolve,
+	zebedee.HomePage: homePage.Resolve,
 }
 
 // ZebedeeService service for communicating with zebedee API.
