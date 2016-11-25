@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-var pageTypeToResolver = map[string]func(*http.Request, requests.ContextIDGenerator, zebedeeModel.HomePage, zebedee.Service) ([]byte, error){
-	"home_page": homePage.Resolve,
+var pageTypeToResolver = map[string]func(*http.Request, zebedeeModel.HomePage, requests.ContextIDGenerator) ([]byte, error){
+	zebedee.HomePage: homePage.Resolve,
 }
 
 // ZebedeeService service for communicating with zebedee API.
@@ -42,7 +42,7 @@ func Resolve(req *http.Request) ([]byte, *common.ONSError) {
 		pageToResolve.URI = "/"
 	}
 
-	resolvedData, error := resolveFunc(req, reqContextIDGen, pageToResolve, ZebedeeService)
+	resolvedData, error := resolveFunc(req, pageToResolve, reqContextIDGen)
 	if err != nil {
 		return nil, common.NewONSError(error, "Resolve error...")
 	}
