@@ -7,6 +7,7 @@ import (
 
 	"github.com/ONSdigital/dp-content-resolver/babbage"
 	"github.com/ONSdigital/dp-content-resolver/content"
+	"github.com/ONSdigital/dp-content-resolver/content/homePage"
 	"github.com/ONSdigital/dp-content-resolver/handlers"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
@@ -34,6 +35,7 @@ func main() {
 
 	content.ZebedeeService = zebedee.CreateClient(time.Second*2, zebedeeURL)
 	content.BabbageService = babbage.CreateClient(time.Second*2, babbageURL)
+	homePage.ZebedeeService = content.ZebedeeService
 
 	log.Namespace = "dp-content-resolver"
 
@@ -41,7 +43,6 @@ func main() {
 	alice := alice.New(log.Handler, requestID.Handler(16)).Then(router)
 
 	router.Get("/healthcheck", healthcheck.Handler)
-
 	router.Get("/{uri:.*}", handlers.Handle)
 
 	log.Debug("Starting server", log.Data{

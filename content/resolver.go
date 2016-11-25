@@ -6,15 +6,17 @@ import (
 
 	"github.com/ONSdigital/dp-content-resolver/babbage"
 	"github.com/ONSdigital/dp-content-resolver/content/homePage"
+	"github.com/ONSdigital/dp-content-resolver/requests"
 	"github.com/ONSdigital/dp-content-resolver/zebedee"
 	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
 	"github.com/ONSdigital/go-ns/common"
 )
 
-var pageTypeToResolver = map[string]func(*http.Request, zebedeeModel.HomePage, zebedee.Service, babbage.Service) ([]byte, error){
-	"home_page": homePage.Resolve,
+var pageTypeToResolver = map[string]func(*http.Request, zebedeeModel.HomePage, zebedee.Service, babbage.Service, requests.ContextIDGenerator) ([]byte, error){
+	zebedee.HomePage: homePage.Resolve,
 }
 
+// ZebedeeService service for communicating with zebedee API.
 var ZebedeeService zebedee.Service
 var BabbageService babbage.Service
 
@@ -22,7 +24,9 @@ var BabbageService babbage.Service
 func Resolve(req *http.Request) ([]byte, *common.ONSError) {
 	uri := req.URL.Path
 
-	zebedeeData, pageType, err := ZebedeeService.GetData(uri)
+	reqContextIDGen := requests.NewContentIDGenerator(req)
+
+	zebedeeData, pageType, err := ZebedeeService.GetData(uri, reqContextIDGen.Generate())
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +45,7 @@ func Resolve(req *http.Request) ([]byte, *common.ONSError) {
 		pageToResolve.URI = "/"
 	}
 
-	resolvedData, error := resolveFunc(req, pageToResolve, ZebedeeService, BabbageService)
+	resolvedData, error := resolveFunc(req, pageToResolve, ZebedeeService, BabbageService, reqContextIDGen)
 	if err != nil {
 		return nil, common.NewONSError(error, "Resolve error...")
 	}

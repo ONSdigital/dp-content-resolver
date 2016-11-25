@@ -1,13 +1,14 @@
 package zebedee
 
 import (
-    "github.com/ONSdigital/go-ns/common"
+	zebedeeModel "github.com/ONSdigital/dp-content-resolver/zebedee/model"
+	"github.com/ONSdigital/go-ns/common"
 )
 
-// Defines interface of zebedee service.
+// Service defines interface of zebedee service.
 type Service interface {
-    GetData(url string) (data []byte, pageType string, err *common.ONSError)
-    GetTaxonomy(url string, depth int) ([]byte, *common.ONSError)
-    GetParents(url string) ([]byte, *common.ONSError)
-    GetTimeSeries(url string) ([]byte, *common.ONSError)
+	GetData(url string, requestContentID string) (data []byte, pageType string, err *common.ONSError)
+	GetTaxonomy(url string, depth int, requestContentID string) ([]zebedeeModel.ContentNode, *common.ONSError)
+	GetParents(url string, requestContentID string) ([]zebedeeModel.ContentNode, *common.ONSError)
+	GetTimeSeries(url string, requestContentID string) (*zebedeeModel.TimeseriesPage, *common.ONSError)
 }
