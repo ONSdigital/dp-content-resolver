@@ -44,7 +44,7 @@ node {
         if (deploymentGroups.size() < 1) return
 
         stage('Deploy') {
-            def appName = 'dp-dd-csv-filter'
+            def appName = 'content-resolver'
             for (group in deploymentGroups) {
                 sh sprintf('aws deploy create-deployment %s %s %s,bundleType=tgz,key=%s', [
                     '--application-name ${appName}',
